@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoFast Logistics</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to GoFast Logistics</h1>
+        <p>Reliable and fast logistics services from Bangalore to major cities in India.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>Rate Calculator</h2>
+            <label for="weight">Select Weight (Kg):</label>
+            <select id="weight">
+                <option value="1">1 Kg</option>
+                <option value="2">2 Kg</option>
+                <option value="3">3 Kg</option>
+                <option value="4">4 Kg</option>
+                <option value="5">5 Kg</option>
+                <option value="6">6 Kg</option>
+                <option value="7">7 Kg</option>
+                <option value="8">8 Kg</option>
+                <option value="9">9 Kg</option>
+                <option value="10">10 Kg</option>
+            </select>
+
+            <label for="destination">Select Destination:</label>
+            <select id="destination">
+                <option value="Bangalore">Bangalore</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Ghy">Guwahati</option>
+            </select>
+
+            <button onclick="calculateRate()">Calculate Rate</button>
+            <p id="result"></p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
