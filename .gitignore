@@ -1,0 +1,11 @@
+# Ignore Windows system files and folders
+AppData/
+Cookies/
+Local Settings/
+My Documents/
+NetHood/
+PrintHood/
+Recent/
+Temp/
+Thumbs.db
+*.tmp
