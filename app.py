@@ -25,20 +25,21 @@ def check_rates():
             return jsonify({"error": "Invalid input, all fields are required"}), 400
 
         # Find origin and destination details
-        origin = pincode_data[pincode_data['Pincode'] == int(origin_pincode)].squeeze()
-        destination = pincode_data[pincode_data['Pincode'] == int(destination_pincode)].squeeze()
+        origin = pincode_data[pincode_data['Pincode'] == int(origin_pincode)]
+        destination = pincode_data[pincode_data['Pincode'] == int(destination_pincode)]
 
         if origin.empty or destination.empty:
             return jsonify({"error": "No service available for the entered pincodes"}), 404
 
-        # Determine the Zone
-        origin_city = origin['City']
-        destination_city = destination['City']
-        origin_state = origin['State']
-        destination_state = destination['State']
-        origin_zone = origin['Zone']
-        destination_zone = destination['Zone']
+        # Extract relevant details from the DataFrame rows
+        origin_city = origin.iloc[0]['City']
+        destination_city = destination.iloc[0]['City']
+        origin_state = origin.iloc[0]['State']
+        destination_state = destination.iloc[0]['State']
+        origin_zone = origin.iloc[0]['Zone']
+        destination_zone = destination.iloc[0]['Zone']
 
+        # Determine the Zone
         if origin_city == destination_city:
             zone = "Zone A"
         elif origin_state == destination_state:
@@ -58,7 +59,7 @@ def check_rates():
         if rate_row.empty:
             return jsonify({"error": f"No rates available for Zone {zone} and service type {service_type}"}), 404
 
-        rate = rate_row['Rate'].values[0]
+        rate = rate_row.iloc[0]['Rate']
 
         # Return the response
         return jsonify({
