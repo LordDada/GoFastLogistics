@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 import pandas as pd
+import os
 
 app = Flask(__name__)
 
-# Load data
-pincode_data = pd.read_csv('Pincodes List.csv')  # Ensure this file exists and is correct
-rates_data = pd.read_excel('Go Fast Logistics Commercial.xlsx')  # Ensure this file exists and is correct
+# Load the data
+pincode_data = pd.read_csv('Pincodes List.csv')  # Ensure this file exists in your project folder
+rates_data = pd.read_excel('Go Fast Logistics Commercial.xlsx')  # Ensure this file exists in your project folder
 
 @app.route('/')
 def home():
@@ -21,40 +22,48 @@ def check_rates():
 
         # Validate inputs
         if not origin_pincode or not destination_pincode or not service_type:
-            return jsonify({"error": "Missing required fields: origin_pincode, destination_pincode, or service_type"}), 400
+            return jsonify({"error": "Invalid input, all fields are required"}), 400
 
-        # Lookup origin and destination
+        # Find origin and destination details
         origin = pincode_data[pincode_data['Pincode'] == int(origin_pincode)].squeeze()
         destination = pincode_data[pincode_data['Pincode'] == int(destination_pincode)].squeeze()
 
         if origin.empty or destination.empty:
             return jsonify({"error": "No service available for the entered pincodes"}), 404
 
-        # Determine Zone
-        if origin['City'] == destination['City']:
-            zone = 'Zone A'
-        elif origin['State'] == destination['State']:
-            zone = 'Zone B'
-        elif origin['Zone'] == destination['Zone']:
-            zone = 'Zone C'
-        elif origin['City'] in ['Mumbai', 'Delhi', 'Bangalore', 'Chennai'] and destination['City'] in ['Mumbai', 'Delhi', 'Bangalore', 'Chennai']:
-            zone = 'Zone D'
-        elif origin['State'] in ['Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Sikkim', 'Arunachal Pradesh', 'Assam', 'Jammu and Kashmir', 'Andaman and Nicobar'] or destination['State'] in ['Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Sikkim', 'Arunachal Pradesh', 'Assam', 'Jammu and Kashmir', 'Andaman and Nicobar']:
-            zone = 'Zone F'
-        else:
-            zone = 'Zone E'
+        # Determine the Zone
+        origin_city = origin['City']
+        destination_city = destination['City']
+        origin_state = origin['State']
+        destination_state = destination['State']
+        origin_zone = origin['Zone']
+        destination_zone = destination['Zone']
 
-        # Get rate
+        if origin_city == destination_city:
+            zone = "Zone A"
+        elif origin_state == destination_state:
+            zone = "Zone B"
+        elif origin_zone == destination_zone:
+            zone = "Zone C"
+        elif origin_city in ['Delhi', 'Mumbai', 'Bangalore', 'Chennai'] and destination_city in ['Delhi', 'Mumbai', 'Bangalore', 'Chennai']:
+            zone = "Zone D"
+        elif origin_state in ['Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Sikkim', 'Arunachal Pradesh', 'Assam', 'Jammu and Kashmir', 'Andaman and Nicobar'] or \
+                destination_state in ['Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Sikkim', 'Arunachal Pradesh', 'Assam', 'Jammu and Kashmir', 'Andaman and Nicobar']:
+            zone = "Zone F"
+        else:
+            zone = "Zone E"
+
+        # Get the rate from rates_data
         rate_row = rates_data[(rates_data['Zone'] == zone) & (rates_data['Service'] == service_type)]
         if rate_row.empty:
-            return jsonify({"error": f"No rate found for Zone: {zone}, Service: {service_type}"}), 404
+            return jsonify({"error": f"No rates available for Zone {zone} and service type {service_type}"}), 404
 
         rate = rate_row['Rate'].values[0]
 
-        # Return response
+        # Return the response
         return jsonify({
-            "origin_city": origin['City'],
-            "destination_city": destination['City'],
+            "origin_city": origin_city,
+            "destination_city": destination_city,
             "zone": zone,
             "rate": rate
         })
@@ -63,4 +72,5 @@ def check_rates():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Render sets the PORT variable
+    app.run(host='0.0.0.0', port=port, debug=True)
